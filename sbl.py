@@ -5,7 +5,7 @@ import plotly.express as px
 import streamlit as st
 import statsmodels.api as sm
 
-
+config = {'displayModeBar': False}
 
 dg_rankings = pd.read_csv("data/dg_rankings.csv")
 stats = pd.read_csv("data/stats - Copy.csv")
@@ -77,4 +77,15 @@ for player in top_100_players:
                 title=f'{player}').update_layout(title_x=0).add_hline(y=final_scores[final_scores.rank_bin=='1-100'].strokes_behind_winner.mean(), line_dash='dash', line_color='red', line_width=1)
 
 
-    st.plotly_chart(fig)
+    st.plotly_chart(fig, config=config)
+
+    # ---- REMOVE UNWANTED STREAMLIT STYLING ----
+hide_st_style = """
+            <style>
+            Main Menu {visibility: hidden;}
+            footer {visibility: hidden;}
+            header {visibility: hidden;}
+            </style>
+            """
+            
+st.markdown(hide_st_style, unsafe_allow_html=True)
