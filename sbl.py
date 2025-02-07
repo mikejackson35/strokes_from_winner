@@ -4,6 +4,14 @@ import datetime as dt
 import plotly.express as px
 import streamlit as st
 import statsmodels.api as sm
+from pathlib import Path
+
+current_dir = Path(__file__).parent if "__file__" in locals() else Path.cwd()
+css_file = current_dir / "styles" / "main.css"
+with open(css_file) as f:
+    st.markdown("<style>{}</style>".format(f.read()), unsafe_allow_html=True)
+
+
 
 dg_rankings = pd.read_csv("data/dg_rankings.csv")
 stats = pd.read_csv("data/stats - Copy.csv")
