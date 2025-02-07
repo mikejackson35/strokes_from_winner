@@ -70,11 +70,11 @@ for player in top_100_players:
                 y='strokes_behind_winner',
                 # color='finish_pos',
                 width=800,
-                template='presentation',
+                template='seaborn',
                 trendline_color_override='black', trendline_options=dict(frac=0.4),
                 trendline='lowess',
                 labels={'event_completed':'Event Date','strokes_behind_winner':'Strokes Behind Winner','finish_pos':'Finish Position'},
-                title=f'{player}').update_layout(title_x=0).add_hline(y=final_scores[final_scores.rank_bin=='1-100'].strokes_behind_winner.median(), line_dash='dash', line_color='pink', line_width=2)
+                title=f'{player}').update_layout(title_x=0).add_hline(y=final_scores[final_scores.rank_bin=='1-100'].strokes_behind_winner.mean(), line_dash='dash', line_color='red', line_width=1)
 
 
     st.plotly_chart(fig)
