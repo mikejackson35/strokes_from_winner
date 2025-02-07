@@ -62,7 +62,7 @@ for player in top_100_players:
 
     final_scores['event_completed'] = pd.to_datetime(final_scores['event_completed'])
     
-    fig = px.scatter(final_scores[final_scores.player_name==player].groupby([pd.Grouper(key='event_completed', freq='M'), 'finish_pos']).mean().reset_index(),
+    fig = px.scatter(final_scores[final_scores.player_name==player].groupby([pd.Grouper(key='event_completed', freq='M'), 'finish_pos']).median().reset_index(),
                 x='event_completed',
                 y='strokes_behind_winner',
                 # color='finish_pos',
