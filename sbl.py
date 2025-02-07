@@ -80,12 +80,12 @@ for player in top_100_players:
     st.plotly_chart(fig, config=config)
 
     # ---- REMOVE UNWANTED STREAMLIT STYLING ----
-hide_st_style = """
-            <style>
-            Main Menu {visibility: hidden;}
-            footer {visibility: hidden;}
-            header {visibility: hidden;}
-            </style>
-            """
+# hide_st_style = """
+#             <style>
+#             Main Menu {visibility: hidden;}
+#             footer {visibility: hidden;}
+#             header {visibility: hidden;}
+#             </style>
+#             """
             
-st.markdown(hide_st_style, unsafe_allow_html=True)
+# st.markdown(hide_st_style, unsafe_allow_html=True)
