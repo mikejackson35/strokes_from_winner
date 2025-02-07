@@ -3,6 +3,7 @@ import pandas as pd
 import datetime as dt
 import plotly.express as px
 import streamlit as st
+import statsmodels
 
 dg_rankings = pd.read_csv("data/dg_rankings.csv")
 stats = pd.read_csv("data/stats - Copy.csv")
