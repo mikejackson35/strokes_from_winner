@@ -10,16 +10,7 @@ stats = pd.read_csv("data/stats - Copy.csv")
 dg_stats = stats.copy()
 dg_rankings = dg_rankings.copy()
 
-# remove text from 'finish_pos'
-dg_stats['fin_text'] = pd.to_numeric(dg_stats['fin_text'].str.replace("T",""), errors='coerce')
-dg_stats.rename(columns={'fin_text':"finish_pos"}, inplace=True) 
-
-# make unique event identifier
-dg_stats['unique_event_id'] = dg_stats['season'].astype(str) + dg_stats['event_id'].astype(str)
-
-# add score to par column
-dg_stats['score_to_par'] = dg_stats['round_score'] - dg_stats['course_par']
-dg_stats.drop(dg_stats[dg_stats.round_score < 40].index, inplace=True)
+st.title('Strokes Behind Leader')
 
 ###########################
 #  SPLIT FROM DG_STATS TO MAKE LOSSES_DF ---> DATA
@@ -75,12 +66,12 @@ for player in top_100_players:
                 x='event_completed',
                 y='strokes_behind_winner',
                 # color='finish_pos',
-                width=900,
-                template='plotly_white',
-                trendline_color_override='black',
+                width=800,
+                template='presentation',
+                trendline_color_override='black', trendline_options=dict(frac=0.4),
                 trendline='lowess',
-                # color_continuous_scale='viridis',
-                title=f'Strokes Behind Winner<br>{player}').add_hline(y=final_scores[final_scores.rank_bin=='1-100'].strokes_behind_winner.median(), line_dash='dash', line_color='pink')
+                labels={'event_completed':'Event Date','strokes_behind_winner':'Strokes Behind Winner','finish_pos':'Finish Position'},
+                title=f'{player}').update_layout(title_x=0).add_hline(y=final_scores[final_scores.rank_bin=='1-100'].strokes_behind_winner.median(), line_dash='dash', line_color='pink', line_width=2)
 
 
     st.plotly_chart(fig)
