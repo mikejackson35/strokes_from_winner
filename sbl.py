@@ -13,7 +13,9 @@ stats = pd.read_csv("data/stats - Copy.csv")
 dg_stats = stats.copy()
 dg_rankings = dg_rankings.copy()
 
-st.title('Strokes Behind Leader')
+st.title('Strokes Behind Winner')
+placeholder = st.empty()
+
 
 ###########################
 #  SPLIT FROM DG_STATS TO MAKE LOSSES_DF ---> DATA
@@ -59,22 +61,32 @@ final_scores = final_scores[['event_name','event_completed','rank_bin','player_n
 
 final_scores['event_completed'] = pd.to_datetime(final_scores['event_completed'])
 
-top_100_players = final_scores[final_scores.rank_bin=='1-100'].groupby('player_name',as_index=False)['finish_pos'].mean().sort_values(by='finish_pos').player_name.unique()
+top_100_players = final_scores[final_scores.rank_bin=='1-100'].groupby('player_name',as_index=False)['strokes_behind_winner'].mean().sort_values(by='strokes_behind_winner').player_name.unique()
 
+# header
+avg = final_scores[final_scores.rank_bin=='1-100'].strokes_behind_winner.mean().round(1)
+with placeholder:
+    st.caption(f'All Players Avg:  {avg}')
+
+# loop to display charts
 for player in top_100_players: 
 
     final_scores['event_completed'] = pd.to_datetime(final_scores['event_completed'])
+
+    recent_avg = round(final_scores[(final_scores.event_completed > '2023-09-01') & (final_scores.player_name==player)].strokes_behind_winner.mean(),1)#.round(1)
     
     fig = px.scatter(final_scores[final_scores.player_name==player].groupby(pd.Grouper(key='event_completed', freq='M'))['strokes_behind_winner'].mean().reset_index(),
                 x='event_completed',
                 y='strokes_behind_winner',
-                # color='finish_pos',
                 width=800,
                 template='seaborn',
                 trendline_color_override='black', trendline_options=dict(frac=0.4),
                 trendline='lowess',
                 labels={'event_completed':'Event Date','strokes_behind_winner':'Strokes Behind Winner','finish_pos':'Finish Position'},
-                title=f'{player}').update_layout(title_x=0).add_hline(y=final_scores[final_scores.rank_bin=='1-100'].strokes_behind_winner.mean(), line_dash='dash', line_color='red', line_width=1)
+                title=f'{player}<br>recent avg -  {recent_avg}'#{final_scores[final_scores.player_name==player].strokes_behind_winner.mean().round(1)}'
+                ).update_layout(title_x=0
+                                ).add_hline(y=final_scores[final_scores.rank_bin=='1-100'].strokes_behind_winner.mean(), 
+                                            line_dash='dash', line_color='red', line_width=1)
 
 
     st.plotly_chart(fig, config=config)
