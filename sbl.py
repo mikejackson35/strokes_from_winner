@@ -64,35 +64,43 @@ final_scores['event_completed'] = pd.to_datetime(final_scores['event_completed']
 top_100_players = final_scores[(final_scores.rank_bin=='1-100') | (final_scores.rank_bin=='101-200')].groupby(['rank_bin','player_name'],as_index=False)['strokes_behind_winner'].mean().sort_values(by=['rank_bin','strokes_behind_winner']).player_name.unique()
 
 # header
-avg = final_scores[final_scores.rank_bin=='1-100'].strokes_behind_winner.mean().round(1)
+avg = final_scores[(final_scores.rank_bin=='1-100') | (final_scores.rank_bin=='101-200')].strokes_behind_winner.mean().round(1)
 with placeholder:
-    st.caption(f'All Players Avg:  {avg}')
+    st.caption(f'Top 200 Avg:  {avg}')
 
-# loop to display charts
+# Loop through each player in the top 100
 for player in top_100_players: 
 
     final_scores['event_completed'] = pd.to_datetime(final_scores['event_completed'])
 
-    recent_avg = round(final_scores[(final_scores.event_completed > '2023-09-01') & (final_scores.player_name==player)].strokes_behind_winner.mean(),1)#.round(1)
+    recent_avg = round(final_scores[(final_scores.event_completed > '2024-09-01') & (final_scores.player_name==player)]
+                       .strokes_behind_winner.mean(), 1)
     
-    fig = px.scatter(final_scores[final_scores.player_name==player].groupby([pd.Grouper(key='event_completed', freq='W'), 'event_name'])['strokes_behind_winner'].mean().dropna().reset_index(),
+    fig = px.scatter(final_scores[final_scores.player_name==player]
+                .groupby([pd.Grouper(key='event_completed', freq='W'), 'event_name'])['strokes_behind_winner']
+                .mean().dropna().reset_index(),
                 x='event_completed',
                 y='strokes_behind_winner',
                 width=800,
+                height=400,
                 template='seaborn',
                 hover_name='event_name',
-                # hover_data={'event_completed':False,'strokes_behind_winner':':.1f'},
-                # trendline_color_override='black', trendline_options=dict(frac=0.4),
-                # trendline='lowess',
-                trendline='rolling', trendline_color_override='black', trendline_options=dict(window=10),
-                labels={'event_completed':'Event Date','strokes_behind_winner':'Strokes Behind Winner','finish_pos':'Finish Position'},
-                title=f'{player}<br>recent avg -  {recent_avg}'
-                ).update_layout(title_x=0, yaxis=dict(range=[0, 30])
-                                ).add_hline(y=final_scores[final_scores.rank_bin=='1-100'].strokes_behind_winner.mean(), 
-                                            line_dash='dash', line_color='red', line_width=1)
+                trendline='rolling', trendline_color_override='black', trendline_options=dict(window=16),
+                labels={'event_completed': 'Event Date', 'strokes_behind_winner': 'Strokes Behind Winner', 'finish_pos': 'Finish Position'},
+                title=f'{player}<br>szn avg - {recent_avg}'
+                ).update_layout(
+                    title_x=0, 
+                    yaxis=dict(range=[0, 30]),
+                    title={'font': {'size': 20}}
+                ).add_hline(
+                    y=final_scores[(final_scores.rank_bin=='1-100') | (final_scores.rank_bin=='101-200')].strokes_behind_winner.mean(), 
+                    line_dash='dash', line_color='red', line_width=1, annotation_text='Top 200 Avg', annotation_position='top left', annotation_font_size=12, annotation_font_color='IndianRed'
+                )
 
+    # Wrap each chart in a bordered container
+    with st.container(border=True):
+        st.plotly_chart(fig, config=config, use_container_width=True)
 
-    st.plotly_chart(fig, config=config)
 
     # ---- REMOVE UNWANTED STREAMLIT STYLING ----
 hide_st_style = """
