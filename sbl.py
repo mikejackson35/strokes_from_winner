@@ -61,7 +61,7 @@ final_scores = final_scores[['event_name','event_completed','rank_bin','player_n
 
 final_scores['event_completed'] = pd.to_datetime(final_scores['event_completed'])
 
-top_100_players = final_scores[final_scores.rank_bin=='1-100'].groupby('player_name',as_index=False)['strokes_behind_winner'].mean().sort_values(by='strokes_behind_winner').player_name.unique()
+top_100_players = final_scores[(final_scores.rank_bin=='1-100') | (final_scores.rank_bin=='101-200')].groupby(['rank_bin','player_name'],as_index=False)['strokes_behind_winner'].mean().sort_values(by=['rank_bin','strokes_behind_winner']).player_name.unique()
 
 # header
 avg = final_scores[final_scores.rank_bin=='1-100'].strokes_behind_winner.mean().round(1)
@@ -75,16 +75,19 @@ for player in top_100_players:
 
     recent_avg = round(final_scores[(final_scores.event_completed > '2023-09-01') & (final_scores.player_name==player)].strokes_behind_winner.mean(),1)#.round(1)
     
-    fig = px.scatter(final_scores[final_scores.player_name==player].groupby(pd.Grouper(key='event_completed', freq='M'))['strokes_behind_winner'].mean().reset_index(),
+    fig = px.scatter(final_scores[final_scores.player_name==player].groupby([pd.Grouper(key='event_completed', freq='W'), 'event_name'])['strokes_behind_winner'].mean().dropna().reset_index(),
                 x='event_completed',
                 y='strokes_behind_winner',
                 width=800,
                 template='seaborn',
-                trendline_color_override='black', trendline_options=dict(frac=0.4),
-                trendline='lowess',
+                hover_name='event_name',
+                # hover_data={'event_completed':False,'strokes_behind_winner':':.1f'},
+                # trendline_color_override='black', trendline_options=dict(frac=0.4),
+                # trendline='lowess',
+                trendline='rolling', trendline_color_override='black', trendline_options=dict(window=10),
                 labels={'event_completed':'Event Date','strokes_behind_winner':'Strokes Behind Winner','finish_pos':'Finish Position'},
-                title=f'{player}<br>recent avg -  {recent_avg}'#{final_scores[final_scores.player_name==player].strokes_behind_winner.mean().round(1)}'
-                ).update_layout(title_x=0
+                title=f'{player}<br>recent avg -  {recent_avg}'
+                ).update_layout(title_x=0, yaxis=dict(range=[0, 30])
                                 ).add_hline(y=final_scores[final_scores.rank_bin=='1-100'].strokes_behind_winner.mean(), 
                                             line_dash='dash', line_color='red', line_width=1)
 
@@ -92,12 +95,12 @@ for player in top_100_players:
     st.plotly_chart(fig, config=config)
 
     # ---- REMOVE UNWANTED STREAMLIT STYLING ----
-# hide_st_style = """
-#             <style>
-#             Main Menu {visibility: hidden;}
-#             footer {visibility: hidden;}
-#             header {visibility: hidden;}
-#             </style>
-#             """
+hide_st_style = """
+            <style>
+            Main Menu {visibility: hidden;}
+            footer {visibility: hidden;}
+            header {visibility: hidden;}
+            </style>
+            """
             
-# st.markdown(hide_st_style, unsafe_allow_html=True)
+st.markdown(hide_st_style, unsafe_allow_html=True)
