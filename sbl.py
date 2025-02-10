@@ -8,7 +8,7 @@ import statsmodels.api as sm
 config = {'displayModeBar': False}
 
 dg_rankings = pd.read_csv("data/dg_rankings.csv")
-stats = pd.read_csv("data/stats - Copy.csv")
+stats = pd.read_csv("data/stats.csv")
 
 dg_stats = stats.copy()
 dg_rankings = dg_rankings.copy()
