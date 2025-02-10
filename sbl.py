@@ -109,18 +109,21 @@ for player in top_100_players:
 
     # 📌 Step 1: Scatter plot with year as a color category
     fig = px.scatter(
+
         grouped_data,
         x='event_completed',
         y='strokes_behind_winner',
         width=800,
-        height=400,
+        height=350,
         template='plotly_dark',
         color='year_category',  # Categorical coloring
         hover_name='event_name',
         hover_data={'event_month_year': True, 'strokes_behind_winner': True, 'event_completed': False, 'year_category': False},  
         labels={'event_month_year': '', 'strokes_behind_winner': 'Strokes Back', 'event_completed':''},  # Remove the column label
         title=f'#{player_rank} {player}<br>Avg - {recent_avg}'
+
     ).update_layout(
+
         title_x=0, 
         yaxis=dict(range=[-1, 30]),
         title={'font': {'size': 20}},
@@ -129,17 +132,22 @@ for player in top_100_players:
         hoverlabel=dict(font_size=12),
         font=dict(size=12),
         showlegend=False,
+
     ).add_hline(
+
         y=final_scores[(final_scores.rank_bin=='1-100') | (final_scores.rank_bin=='101-200')]
         .strokes_behind_winner.mean(), 
         line_dash='dash', line_color='red', line_width=1, 
         annotation_text='Top 200 Avg', annotation_position='top left', 
         annotation_font_size=12, annotation_font_color='IndianRed'
+
     ).update_yaxes(
+
         showgrid=True, gridwidth=1, gridcolor='LightGray'
+
     ).update_traces(marker=dict(size=8)) 
 
-    # 📌 Step 2: Manually add a single continuous rolling trendline (black)
+    # Add a trendline to the scatter plot
     fig.add_trace(
         px.line(
             grouped_data,
