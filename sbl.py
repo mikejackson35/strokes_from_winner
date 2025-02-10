@@ -118,7 +118,7 @@ for player in top_100_players:
         template='plotly_dark',
         color='year_category',  # Categorical coloring
         hover_name='event_name',
-        hover_data={'event_month_year': True, 'strokes_behind_winner': True, 'event_completed': False, 'year_category': False},  
+        hover_data={'year_category': False},  
         labels={'event_month_year': '', 'strokes_behind_winner': 'Strokes Back', 'event_completed':''},  # Remove the column label
         title=f'#{player_rank} {player}<br>Avg - {recent_avg}'
 
