@@ -76,7 +76,7 @@ for player in top_100_players:
     recent_avg = round(final_scores[(final_scores.event_completed > '2024-09-01') & (final_scores.player_name==player)]
                        .strokes_behind_winner.mean(), 1)
     
-    fig = px.scatter(final_scores[final_scores.player_name==player]
+    fig = px.scatter(final_scores[(final_scores.player_name==player) & (final_scores.event_completed > '2019-09-01')]
                 .groupby([pd.Grouper(key='event_completed', freq='W'), 'event_name'])['strokes_behind_winner']
                 .mean().dropna().reset_index(),
                 x='event_completed',
