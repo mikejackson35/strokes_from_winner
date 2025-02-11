@@ -107,7 +107,7 @@ for player in top_100_players:
 
 
 
-    # 📌 Step 1: Scatter plot with year as a color category
+    # Scatter plot with year as a color category
     fig = px.scatter(
 
         grouped_data,
