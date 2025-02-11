@@ -20,7 +20,7 @@ placeholder = st.empty()
 ###########################
 #  SPLIT FROM DG_STATS TO MAKE LOSSES_DF ---> DATA
 
-non_stat_cols = ['event_name','unique_event_id','event_completed','player_name','round_num','round_score','finish_pos']
+non_stat_cols = ['season','event_name','unique_event_id','event_completed','player_name','round_num','round_score','finish_pos']
 
 # leaderboard thru 3 rounds of all tournaments
 temp = dg_stats[dg_stats.round_num < 4][non_stat_cols].sort_values(['event_completed','player_name','round_num','round_score'])
@@ -59,11 +59,11 @@ player_rank_map = dict(zip(dg_rankings['player_name'],dg_rankings['datagolf_rank
 final_scores['rank_bin'] = final_scores['player_name'].map(rank_map)
 final_scores['player_rank'] = final_scores['player_name'].map(player_rank_map)
 
-final_scores = final_scores[['event_name','event_completed','rank_bin','player_rank','player_name','finish_pos','r4_delta','rd_4_move','strokes_behind_winner']]
+final_scores = final_scores[['season','event_name','event_completed','rank_bin','player_rank','player_name','finish_pos','r4_delta','rd_4_move','strokes_behind_winner']]
 
 final_scores['event_completed'] = pd.to_datetime(final_scores['event_completed'])
 
-final_scores['year'] = final_scores['event_completed'].dt.year
+# final_scores['year'] = final_scores['event_completed'].dt.year
 
 top_100_players = final_scores[(final_scores.rank_bin=='1-100') | (final_scores.rank_bin=='101-200')].sort_values(by='player_rank').player_name.unique()
 
@@ -92,12 +92,12 @@ for player in top_100_players:
     data['year_continuous'] = data['event_completed'].dt.year  
 
     # Perform the grouping operation while preserving event dates
-    grouped_data = data.groupby([pd.Grouper(key='event_completed', freq='W'), 'event_name'])[
+    grouped_data = data.groupby([pd.Grouper(key='event_completed', freq='W'), 'event_name','season'])[
         ['strokes_behind_winner', 'rd_4_move', 'year_continuous']
     ].mean().dropna().reset_index()
 
     # Convert 'year_continuous' to string for categorical coloring
-    grouped_data['year_category'] = grouped_data['year_continuous'].astype(str)
+    grouped_data['year_category'] = grouped_data['season'].astype(str)
 
     # ✅ Compute the rolling trendline manually (ensures continuity across years)
     grouped_data['rolling_avg'] = grouped_data['strokes_behind_winner'].rolling(window=16, min_periods=16).mean()
@@ -114,7 +114,7 @@ for player in top_100_players:
         x='event_completed',
         y='strokes_behind_winner',
         width=800,
-        height=350,
+        height=400,
         template='plotly_dark',
         color='year_category',  # Categorical coloring
         hover_name='event_name',
