@@ -4,22 +4,34 @@ import datetime as dt
 import plotly.express as px
 import streamlit as st
 import statsmodels.api as sm
+import secrets
+from utils import process_raw_stats
 
 config = {'displayModeBar': False}
 
-dg_rankings = pd.read_csv("data/dg_rankings.csv")
-stats = pd.read_csv("data/stats.csv")
+dg_key = st.secrets.dg_key
 
-dg_stats = stats.copy()
-dg_rankings = dg_rankings.copy()
 
+#############
+## Player Statistics ##
+stats_dfs = []
+
+for year in range(2017, 2026):
+    url = f"https://feeds.datagolf.com/historical-raw-data/rounds?tour=pga&event_id=all&year={year}&file_format=csv&key={dg_key}"
+    stats_dfs.append(pd.read_csv(url))
+dg_stats = process_raw_stats(pd.concat(stats_dfs, ignore_index=True))
+
+## Player Rankings ##
+dg_rankings = pd.read_csv(f"https://feeds.datagolf.com/preds/get-dg-rankings?file_format=csv&key={dg_key}")
+
+
+
+## UI ##
 st.title('Strokes Behind Winner')
 placeholder = st.empty()
 
 
 ###########################
-#  SPLIT FROM DG_STATS TO MAKE LOSSES_DF ---> DATA
-
 non_stat_cols = ['season','event_name','unique_event_id','event_completed','player_name','round_num','round_score','finish_pos']
 
 # leaderboard thru 3 rounds of all tournaments
@@ -27,20 +39,20 @@ temp = dg_stats[dg_stats.round_num < 4][non_stat_cols].sort_values(['event_compl
 temp['3_rd_score'] = temp.groupby(['player_name','unique_event_id'])['round_score'].cumsum(axis=0)
 leaderboard_after_3 = temp[temp.round_num==3].sort_values(['unique_event_id', '3_rd_score']) # keeping for leaderboard thru 3 rounds
 
-# # r4_delta column 
+# # r3_delta column 
 leader_score = leaderboard_after_3.groupby('unique_event_id')[['unique_event_id','3_rd_score']].min().reset_index(drop=True)
 leaderboard_after_3 = pd.merge(leaderboard_after_3,leader_score,on='unique_event_id').rename(columns={'3_rd_score_x':'score_thru_3','3_rd_score_y':'leader_score'})
 leaderboard_after_3['r4_delta'] = leaderboard_after_3.score_thru_3 - leaderboard_after_3.leader_score
 leaderboard_after_3 = leaderboard_after_3.drop(columns='leader_score')
 
-# leaderboard thru 3 rounds of all tournaments
+# final leaderboard
 temp = dg_stats[dg_stats.round_num < 5][non_stat_cols].sort_values(['event_completed','player_name','round_num','round_score'])
 temp['4_rd_score'] = temp.groupby(['player_name','unique_event_id'])['round_score'].cumsum(axis=0)
-leaderboard_after_4 = temp[temp.round_num==4][['unique_event_id','player_name','4_rd_score']] # keeping for leaderboard thru 3 rounds
+leaderboard_after_4 = temp[temp.round_num==4][['unique_event_id','player_name','4_rd_score']] # keeping for leaderboard thru 4 rounds
 
-# r4_delta column 
+# final delta
 leader_score = leaderboard_after_4.groupby('unique_event_id')[['unique_event_id','4_rd_score']].min().reset_index(drop=True)
-leaderboard_after_4 = pd.merge(leaderboard_after_4,leader_score,on='unique_event_id').rename(columns={'4_rd_score_x':'score_thru_4','4_rd_score_y':'winning_score'})#.drop(columns='4_rd_score_y')
+leaderboard_after_4 = pd.merge(leaderboard_after_4,leader_score,on='unique_event_id').rename(columns={'4_rd_score_x':'score_thru_4','4_rd_score_y':'winning_score'})
 
 final_scores = pd.merge(leaderboard_after_3,leaderboard_after_4, how='left', on=['unique_event_id','player_name'])
 
@@ -62,8 +74,6 @@ final_scores['player_rank'] = final_scores['player_name'].map(player_rank_map)
 final_scores = final_scores[['season','event_name','event_completed','rank_bin','player_rank','player_name','finish_pos','r4_delta','rd_4_move','strokes_behind_winner']]
 
 final_scores['event_completed'] = pd.to_datetime(final_scores['event_completed'])
-
-# final_scores['year'] = final_scores['event_completed'].dt.year
 
 top_100_players = final_scores[(final_scores.rank_bin=='1-100') | (final_scores.rank_bin=='101-200')].sort_values(by='player_rank').player_name.unique()
 
