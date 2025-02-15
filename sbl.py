@@ -131,6 +131,7 @@ for player in top_100_players:
         yaxis_title='Strokes Behind Winner',
         hoverlabel=dict(font_size=12),
         font=dict(size=12),
+        showlegend=False,
         # legend=dict(title=' ', orientation='h', y=1.1, x=0.2),
 
     ).add_hline(
