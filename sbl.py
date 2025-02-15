@@ -85,7 +85,7 @@ for player in top_100_players:
 
     data = final_scores[
         (final_scores.player_name == player) & 
-        (final_scores.event_completed > '2020-09-01')
+        (final_scores.event_completed > '2020-11-01')
     ].copy()
 
     # Create a continuous numerical year column
