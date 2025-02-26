@@ -12,19 +12,24 @@ config = {'displayModeBar': False}
 dg_key = st.secrets.dg_key
 
 
-#############
-## Player Statistics ##
-stats_dfs = []
+## Get Data ##
 
-for year in range(2017, 2026):
-    url = f"https://feeds.datagolf.com/historical-raw-data/rounds?tour=pga&event_id=all&year={year}&file_format=csv&key={dg_key}"
-    stats_dfs.append(pd.read_csv(url))
-dg_stats = process_raw_stats(pd.concat(stats_dfs, ignore_index=True))
+@st.cache_data(ttl=86400)  # Cache data for 1 day
+def fetch_player_stats():
+    stats_dfs = []
+    for year in range(2017, 2026):
+        url = f"https://feeds.datagolf.com/historical-raw-data/rounds?tour=pga&event_id=all&year={year}&file_format=csv&key={dg_key}"
+        stats_dfs.append(pd.read_csv(url))
+    return process_raw_stats(pd.concat(stats_dfs, ignore_index=True))
 
-## Player Rankings ##
-dg_rankings = pd.read_csv(f"https://feeds.datagolf.com/preds/get-dg-rankings?file_format=csv&key={dg_key}")
+@st.cache_data(ttl=86400)  # Cache rankings for 1 day
+def fetch_player_rankings():
+    url = f"https://feeds.datagolf.com/preds/get-dg-rankings?file_format=csv&key={dg_key}"
+    return pd.read_csv(url)
 
-
+# Fetch data once and reuse
+dg_stats = fetch_player_stats()
+dg_rankings = fetch_player_rankings()
 
 ## UI ##
 st.title('Strokes Behind Winner')
@@ -137,7 +142,6 @@ for player in top_100_players:
         title_x=0, 
         yaxis=dict(range=[-1, 30]),
         title={'font': {'size': 20}},
-        # xaxis_title='Event Date',
         yaxis_title='Strokes Behind Winner',
         hoverlabel=dict(font_size=12),
         font=dict(size=12),
