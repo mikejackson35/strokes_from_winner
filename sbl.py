@@ -70,10 +70,10 @@ bins100 = [0, 100, 200, 300, 400, 500]
 labels100 = ['1-100', '101-200', '201-300', '301-400', '401-500']
 dg_rankings['bin_100'] = pd.cut(dg_rankings['datagolf_rank'], bins=bins100, labels=labels100)
 
-rank_map = dict(zip(dg_rankings['player_name'],dg_rankings['bin_100']))
+player_bin_map = dict(zip(dg_rankings['player_name'],dg_rankings['bin_100']))
 player_rank_map = dict(zip(dg_rankings['player_name'],dg_rankings['datagolf_rank']))
 
-final_scores['rank_bin'] = final_scores['player_name'].map(rank_map)
+final_scores['rank_bin'] = final_scores['player_name'].map(player_bin_map)
 final_scores['player_rank'] = final_scores['player_name'].map(player_rank_map)
 
 final_scores = final_scores[['season','event_name','event_completed','rank_bin','player_rank','player_name','finish_pos','r4_delta','rd_4_move','strokes_behind_winner']]
