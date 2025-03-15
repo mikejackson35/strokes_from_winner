@@ -11,6 +11,11 @@ config = {'displayModeBar': False}
 
 dg_key = st.secrets.dg_key
 
+st.set_page_config(
+    page_title="Strokes From Winner",
+    page_icon=":golf:",
+)
+
 
 ## Get Data ##
 
